@@ -1,0 +1,12 @@
+*** ./src/desktop/src/ui/Index.js	2018-10-07 23:13:14.000000000 +0200
+--- ./src/desktop/src/ui/Index_patch.js	2018-10-09 17:05:05.582582711 +0200
+***************
+*** 168,173 ****
+--- 168,174 ----
+          try {
+              await Electron.readKeychain(ACC_MAIN);
+          } catch (err) {
++             console.log(err)
+              this.setState({
+                  fatalError: true,
+              });

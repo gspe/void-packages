@@ -1,0 +1,46 @@
+# Template file for 'trinity-wallet'
+pkgname=trinity-wallet
+version=0.3.6
+revision=1
+# wrksrc="${pkgname}-${version}"
+wrksrc="trinity-wallet-develop"
+#create_wrksrc=yes
+#only_for_archs="i686 x86_64"
+# build_style=gnu-configure
+#configure_args=""
+#make_build_args=""
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends="nodejs-lts yarn git unzip python"
+makedepends="libsecret-devel"
+depends=""
+short_desc="The IOTA Trinity Wallet"
+maintainer="Giuseppe Fierro <gspe@ae-design.ws>"
+license="GPL-3.0-or-later"
+homepage="https://trinity.iota.org"
+# distfiles="https://github.com/iotaledger/${pkgname}/archive/${version}.tar.gz"
+distfiles="https://github.com/iotaledger/trinity-wallet/archive/develop.zip"
+checksum=f8a434204b6be750b6efd7cba07219d8513f946c601cf9d1ff40ca9903044788
+# Due to electron
+only_for_archs="i686 x86_64"
+# nostrip_files="code-oss"
+
+do_build() {
+   yarn
+   cd src/shared
+   yarn
+   cd ../desktop
+   npm install
+   npm run build
+   npm run compile:linux
+
+    # yarn full-setup
+    # cd src/desktop
+    # npm run build
+    # npm run compile:linux
+}
+
+do_install() {
+   vmkdir usr/lib
+}
