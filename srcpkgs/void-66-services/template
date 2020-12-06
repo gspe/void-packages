@@ -1,0 +1,26 @@
+# Template file for 'void-66-services'
+pkgname=void-66-services
+version=cfd3f75972a4f05203c9b37999b21909d8a6a548
+revision=1
+#archs="i686 x86_64"
+#wrksrc=
+#create_wrksrc=yes
+build_style=gnu-makefile
+#configure_args=""
+#make_build_args=""
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends=""
+makedepends=""
+depends=""
+short_desc="66 service frontends for voidlinux"
+maintainer="Giuseppe Fierro <gspe@ae-design.ws>"
+license="BSD-2-Clause"
+homepage="https://github.com/mobinmob/void-66-services"
+distfiles="https://github.com/mobinmob/${pkgname}/archive/${version}.zip"
+checksum=2bc0094e2b58d3f8618f16355442935741973bc2346118d380f12a1a09729410
+
+post-install() {
+    nenene
+}

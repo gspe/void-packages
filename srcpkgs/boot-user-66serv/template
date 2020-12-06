@@ -1,0 +1,18 @@
+# Template file for 'boot-user-66serv'
+pkgname=boot-user-66serv
+version=0.4.2
+revision=1
+wrksrc=${pkgname}-v${version}
+build_style=gnu-configure
+#configure_args=""
+depends="scandir-66serv 66 66-tools"
+short_desc="Nested supervision tree for 66"
+maintainer="Giuseppe Fierro <gspe+void@offlink.xyz>"
+license="ISC"
+homepage="https://framagit.org/pkg/obmods/boot-user-66serv"
+distfiles="https://framagit.org/pkg/obmods/${pkgname}/-/archive/v${version}/${pkgname}-v${version}.zip"
+checksum=bf6747194467bb0f908171ac5f4451d44b8f194e88fd0d8cda52f533a69d1f2e
+
+post_install() {
+	vlicense LICENSE
+}

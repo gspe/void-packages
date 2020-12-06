@@ -1,0 +1,18 @@
+# Template file for 'scandir-66serv'
+pkgname=scandir-66serv
+version=0.2.1
+revision=1
+wrksrc=${pkgname}-v${version}
+build_style=gnu-configure
+#configure_args="--with-user-service-conf=.local/66/conf"
+depends="execline s6 66 66-tools"
+short_desc="Nested scandir for 66"
+maintainer="Giuseppe Fierro <gspe+void@offlink.xyz>"
+license="ISC"
+homepage="https://framagit.org/pkg/obmods/scandir-66serv"
+distfiles="https://framagit.org/pkg/obmods/${pkgname}/-/archive/v${version}/${pkgname}-v${version}.zip"
+checksum=5395e4b41198a4b584f1d195b513639d6f80126e454f122d780eba27e619e67c
+
+post_install() {
+	vlicense LICENSE
+}
