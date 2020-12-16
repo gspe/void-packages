@@ -1,0 +1,554 @@
+# Template file for 'nosh'
+pkgname=nosh
+version=1.40
+revision=1
+create_wrksrc=yes
+hostmakedepends="redo pax docbook-xml docbook-xsl xmlto"
+makedepends="ncurses-devel libuuid-devel libressl-devel"
+short_desc="Suite of system-level utilities for initializing and running Linux system"
+maintainer="Giuseppe Fierro <gspe@ae-design.ws>"
+license="ISC"
+homepage="http://jdebp.info./Softwares/nosh/index.html"
+distfiles="http://jdebp.info./Repository/freebsd/${pkgname}-${version}.tar.gz"
+checksum=263982c4ba2889f823f9d4be6ac2daafd1af5b341f9e02f2ed7b28b0788e02c3
+
+do_configure() {
+	# taken from https://github.com/tacatac/archnosh/blob/master/PKGBUILD
+	find source/ -type f -print0 | xargs -0 sed -i 's@ncursesw/curses\.h@curses.h@g'
+
+	# Fix os-dependant services
+	vsed -e "s@ext=who@ext=linux@" -i source/convert/per-user/per-user.conf.do
+	vsed -e "s@ext=who@ext=redhat-linux@" -i source/convert/per-user/gconfd.service.do
+	vsed -e "s@ext=who@ext=redhat-linux@" -i source/convert/per-user/at-spi-dbus-bus.service.do
+	vsed -e "s@ext=who@ext=redhat-linux@" -i source/services/dbus-daemon.service.d/os-dependant.conf.do
+	vsed -e "s@ext=who@ext=redhat-linux@" -i source/services/dbus-broker.service.d/os-dependant.conf.do
+	vsed -e "s@ext=who@ext=redhat-linux@" -i source/services/exim4-smtp-relay@.service.d/os-dependant.conf.do
+	vsed -e "s@ext=who@ext=redhat-linux@" -i source/services/exim4-smtp-submission@.service.d/os-dependant.conf.do
+	vsed -e "s@ext=who@ext=linux@" -i source/services/system-wide.conf.do
+	vsed -e "s@local/bin@libexec@" -i source/services/system-wide.conf.linux
+	vsed -e "s@ext=who@ext=redhat-linux@" -i source/systemd/system/service-manager.socket.do
+	# maybe we need to patch also source/convert/rc.conf.do
+}
+
+do_build() {
+	package/compile
+}
+
+do_install() {
+	package/stage . nosh-void
+	vlicense source/COPYING
+}
+
+nosh-guide_package() {
+	short_desc+=" - User guide for the various nosh-* packages"
+	depends="${sourcepkg}-${version}_${revision}"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-guide/usr/*" usr
+	}
+}
+
+nosh-exec_package() {
+	short_desc+=" - Minimal non-shell script processor and various chain-load utilities useful for services"
+	depends="${sourcepkg}-${version}_${revision}"
+	conflicts="daemontools"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-exec/usr/*" usr
+	}
+}
+
+nosh-service-management_package() {
+	short_desc+=" - Service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision}"
+	conflicts="daemontools"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-service-management/usr/*" usr
+	}
+}
+
+nosh-service-management-extras_package() {
+	short_desc+=" - Extra service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision}"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-service-management-extras/usr/*" usr
+	}
+}
+
+nosh-terminal-management_package() {
+	short_desc+=" - Virtual terminal, pseudo-terminal, and TUI login tools"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-terminal-management/usr/*" usr
+	}
+}
+
+nosh-terminal-extras_package() {
+	short_desc+=" - Extra terminal utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-terminal-management"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-terminal-extras/usr/*" usr
+	}
+}
+
+nosh-zsh-completion_package() {
+	short_desc+=" - Z Shell completion functions for the nosh toolset"
+	depends="${sourcepkg}-${version}_${revision}"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-zsh-completion/usr/*" usr
+	}
+}
+
+nosh-systemv-shims_package() {
+	short_desc+=" - BSD and System 5 shim service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-systemv-shims/usr/*" usr
+	}
+}
+
+nosh-systemd-shims_package() {
+	short_desc+=" - Systemd shim service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-systemd-shims/usr/*" usr
+	}
+}
+
+nosh-upstart-shims_package() {
+	short_desc+=" - Upstart shim service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-upstart-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-execline-shims_package() {
+	short_desc+=" - Execline utility shims"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec"
+	conflicts="execline"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-execline-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-core-shims_package() {
+	short_desc+=" - Core utility shims"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec"
+	conflicts="coreutils util-linux"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-core-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-linux-shims_package() {
+	short_desc+=" - Core utility shims"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-terminal-management"
+	conflicts="coreutils util-linux"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-linux-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-service-command-shim_package() {
+	short_desc+=" - Shim for the old BSD and System 5 service command"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management nosh-systemv-shims"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-service-command-shim/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-debian-shims_package() {
+	short_desc+=" - Debian shim service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management nosh-service-command-shim nosh-systemv-shims"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-debian-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-openrc-shims_package() {
+	short_desc+=" - OpenRC shim service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management nosh-systemv-shims"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-openrc-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-openbsd-shims_package() {
+	short_desc+=" - OpenBSD shim service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management nosh-systemv-shims"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-openbsd-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-freebsd-shims_package() {
+	short_desc+=" - FreeBSD shim service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-terminal-management"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-freebsd-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-bsd-shims_package() {
+	short_desc+=" - BSD shim service and system management utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management"
+	conflicts="android-tools"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-bsd-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-ucspi-tcp-shims_package() {
+	short_desc+=" - Bernstein UCSPI-TCP shim service utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec"
+	conflicts="ucspi-tcp"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-ucspi-tcp-shims/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+nosh-kbd-shims_package() {
+	short_desc+=" - Shim kbd utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-terminal-management"
+	conflicts="kbd"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-kbd-shims/usr/*" usr
+	}
+}
+
+nosh-net-tools-shims_package() {
+	short_desc+=" - Linux utility shims"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-net-tools-shims/usr/*" usr
+	}
+}
+
+# # Maybe we don't need this package
+# nosh-logrotate-shims_package() {
+# 	short_desc+=" - Shim for the logrotate package"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-bundles"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-logrotate-shims/usr/*" usr
+# 	}
+# }
+
+# # Maybe we don't need this package
+# nosh-bcron-as-cron-shims_package() {
+# 	short_desc+=" - Shim for the bcron package"
+# 	depends="${sourcepkg}-${version}_${revision} bcron"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-bcron-as-cron-shims/usr/*" usr
+# 	}
+# }
+
+# Maybe we don't need this package
+nosh-desktop-bus-shims_package() {
+	short_desc+=" - Replacements for Desktop Bus utilities"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-desktop-bus-shims/usr/*" usr
+	}
+}
+
+# Maybe we need some install/remove script
+nosh-bundles_package() {
+	short_desc+=" - Service bundles"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management nosh-exec nosh-terminal-management shadow"
+	pkg_install() {
+		vmkdir etc
+		vcopy "nosh-void/nosh-bundles/etc/*" etc
+		vmkdir usr
+		vcopy "nosh-void/nosh-bundles/usr/*" usr
+		vmkdir var
+		vcopy "nosh-void/nosh-bundles/var/*" var
+	}
+	post-install() {
+        # we need to not remove empty dirs
+        echo "we need to not remove empty dirs!"
+    }
+}
+
+# # Maybe we don't need this package
+# nosh-debian-crontab-no-anacron_package() {
+# 	short_desc+=" - Debian common crontab (not-anacron version)"
+# 	depends="${sourcepkg}-${version}_${revision}"
+# 	conflicts="anacron nosh-debian-crontab-anacron"
+# 	pkg_install() {
+# 		vmkdir etc
+# 		vcopy "nosh-void/nosh-debian-crontab-no-anacron/etc/*" etc
+# 	}
+# }
+
+# # Maybe we don't need this package
+# nosh-debian-crontab-anacron_package() {
+# 	short_desc+=" - Debian common crontab (anacron version)"
+# 	depends="${sourcepkg}-${version}_${revision}"
+# 	conflicts="nosh-debian-crontab-no-anacron"
+# 	pkg_install() {
+# 		vmkdir etc
+# 		vcopy "nosh-void/nosh-debian-crontab-anacron/etc/*" etc
+# 	}
+# }
+
+# Maybe we need some install/remove script
+nosh-run-system-manager_package() {
+	short_desc+=" - Run the nosh system manager"
+	depends="${sourcepkg}-${version}_${revision} nosh-service-management nosh-exec nosh-bundles redo"
+	conflicts="nosh-run-via-systemd"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-system-manager/usr/*" usr
+	}
+}
+
+# Maybe we need some install/remove script
+nosh-run-void-desktop-base_package() {
+	short_desc+=" - Run the local syslog service"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles nosh-terminal-management"
+	conflicts="nosh-run-void-server-base"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-debian-desktop-base/usr/*" usr
+	}
+}
+
+# Maybe we need some install/remove script
+nosh-run-void-server-base_package() {
+	short_desc+=" - Run the local syslog service"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles nosh-terminal-management"
+	conflicts="nosh-run-void-desktop-base"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-debian-server-base/usr/*" usr
+	}
+}
+
+# Maybe we don't need this package
+# Maybe we need some install/remove script
+nosh-run-kernel-vt_package() {
+	short_desc+=" - Run old-style kernel virtual terminals"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles nosh-terminal-management"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-kernel-vt/usr/*" usr
+	}
+}
+
+# Maybe we need some install/remove script
+nosh-run-user-vt_package() {
+	short_desc+=" - Run new-style application-mode virtual terminals"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles nosh-terminal-management"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-user-vt/usr/*" usr
+	}
+}
+
+# # We don't need this package
+# nosh-run-via-open-rc_package() {
+# 	short_desc+=" - Run the nosh service manager and daemontools service scanner via OpenRC"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-service-management nosh-bundles openrc"
+# 	pkg_install() {
+# 		vmkdir etc
+# 		vcopy "nosh-void/nosh-run-via-open-rc/etc/*" etc
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-run-via-open-rc/usr/*" usr
+# 	}
+# }
+
+# # We don't need this package
+# nosh-run-via-systemd_package() {
+# 	short_desc+=" - Run the nosh service manager and daemontools service scanner via systemd"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-service-management nosh-bundles systemd"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-run-via-systemd/usr/*" usr
+# 	}
+# }
+
+# Maybe we need some install/remove script
+nosh-run-virtualbox-guest_package() {
+	short_desc+=" - Run VirtualBox guest additions"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-virtualbox-guest/usr/*" usr
+	}
+}
+
+# Maybe we need some install/remove script
+nosh-run-freedesktop-system-bus_package() {
+	short_desc+=" - Run the system-wide message bus from freedesktop.org"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-freedesktop-system-bus/usr/*" usr
+	}
+}
+
+# Maybe we need some install/remove script
+nosh-run-freedesktop-kits_package() {
+	short_desc+=" - Run the various 'kit' programs from freedesktop.org"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-freedesktop-kits/usr/*" usr
+	}
+}
+
+# Maybe we need some install/remove script
+nosh-run-openssh-server_package() {
+	short_desc+=" - Run the OpenSSH server"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-openssh-server/usr/*" usr
+	}
+}
+
+# # Maybe we need some install/remove script
+# nosh-run-appletalk_package() {
+# 	short_desc+=" - Run the various AppleTalk service"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-run-appletalk/usr/*" usr
+# 	}
+# }
+
+# Maybe we need some install/remove script
+nosh-run-udev_package() {
+	short_desc+=" - Run udev as the device manager"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles"
+	conflicts="nosh-run-busybox-mdev nosh-run-suckless-mdev nosh-run-vdev nosh-run-systemd-udev"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-udev/usr/*" usr
+	}
+}
+
+# # We don't need this package
+# # Maybe we need some install/remove script
+# nosh-systemd-udev_package() {
+# 	short_desc+=" - Run systemd-udev as the device manager"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles systemd"
+# 	conflicts="nosh-run-busybox-mdev nosh-run-suckless-mdev nosh-run-vdev nosh-run-udev"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-systemd-udev/usr/*" usr
+# 	}
+# }
+
+# # Maybe we don't need this package
+# # Maybe we need some install/remove script
+# nosh-run-busybox-mdev_package() {
+# 	short_desc+=" - Run BusyBox mdev as the device manager"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles busybox-mdev"
+# 	conflicts="nosh-run-udev nosh-run-suckless-mdev nosh-run-vdev nosh-run-systemd-udev"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-run-busybox-mdev/usr/*" usr
+# 	}
+# }
+
+# # Maybe we don't need this package
+# # Maybe we need some install/remove script
+# nosh-run-suckless-mdev_package() {
+# 	short_desc+=" - Run SuckLess mdev as the device manager"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles smdev"
+# 	conflicts="nosh-run-udev nosh-run-busybox-mdev nosh-run-vdev nosh-run-systemd-udev"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-run-suckless-mdev/usr/*" usr
+# 	}
+# }
+
+# # Maybe we don't need this package
+# # Maybe we need some install/remove script
+# nosh-run-vdev_package() {
+# 	short_desc+=" - Run vdev as the device manager"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles vdev"
+# 	conflicts="nosh-run-busybox-mdev nosh-run-suckless-mdev nosh-run-udev nosh-run-systemd-udev"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-run-vdev/usr/*" usr
+# 	}
+# }
+
+# # Maybe we don't need this package
+# # Maybe we need some install/remove script
+# nosh-run-mdevd_package() {
+# 	short_desc+=" - Run Laurent Bercot's mdevd as the device manager"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-service-management nosh-bundles"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-run-mdevd/usr/*" usr
+# 	}
+# }
+
+# Maybe we need some install/remove script
+nosh-run-local-syslog_package() {
+	short_desc+=" - Run the local syslog service"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-local-syslog/usr/*" usr
+	}
+}
+
+# Maybe we need some install/remove script
+nosh-run-klog_package() {
+	short_desc+=" - Run the klog service"
+	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles"
+	pkg_install() {
+		vmkdir usr
+		vcopy "nosh-void/nosh-run-klog/usr/*" usr
+	}
+}
+
+# # Maybe we don't need this package
+# # Maybe we need some install/remove script
+# nosh-run-bcron_package() {
+# 	short_desc+=" - Run the bcron services"
+# 	depends="${sourcepkg}-${version}_${revision} nosh-exec nosh-service-management nosh-bundles bcron"
+# 	pkg_install() {
+# 		vmkdir usr
+# 		vcopy "nosh-void/nosh-run-bcron/usr/*" usr
+# 	}
+# }

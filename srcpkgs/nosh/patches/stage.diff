@@ -1,0 +1,74 @@
+--- package/stage.origin	2019-03-07 17:11:13.000000000 +0100
++++ package/stage	2020-12-14 20:11:12.112313054 +0100
+@@ -19,15 +19,15 @@
+ # distributor patchable stuff
+ 
+ # Eventually, these will be /usr .
+-binprefix="/usr/local"
+-libprefix="/usr/local"
++binprefix="/usr"
++libprefix="/usr"
+ # Eventually, these will be /usr/share .
+-manprefix="/usr/local"
+-docprefix="/usr/local/share"
++manprefix="/usr/share"
++docprefix="/usr/share"
+ # Eventually, this will be / .
+-etcprefix="/usr/local"
++etcprefix="/"
+ # Eventually, this will be /usr/share .
+-prsprefix="/usr/local/etc"
++prsprefix="/usr/share"
+ 
+ # Set this to blank or unset it if /usr/{s,}bin and /{s,}bin are identical.
+ case "`uname`" in
+@@ -47,7 +47,7 @@
+ 	arch:*) 	split_os="" ;;
+ 	centos:*)	split_os="" ;;
+ 	rhel:*) 	split_os="" ;;
+-	*)      	split_os="YES" ;;
++	*)      	split_os="" ;;
+ 	esac
+ 	;;
+ *BSD)	split_os="YES" ;;
+@@ -96,20 +96,20 @@
+ 
+ 	if test -s package/nosh-"$i".commands8 || test -s package/nosh-"$i".aliases8
+ 	then
+-		install -d -m 0755 -- "${dest}"/nosh-"${i}"/"${binprefix}"/sbin 
++		install -d -m 0755 -- "${dest}"/nosh-"${i}"/"${binprefix}"/bin
+ 	fi
+ 	if test -s package/nosh-"$i".commands8
+ 	then
+ 		while read -r j
+ 		do
+-			ln -f -- "${src}"/command/"$j" "${dest}"/nosh-"${i}"/"${binprefix}"/sbin/ 
++			ln -f -- "${src}"/command/"$j" "${dest}"/nosh-"${i}"/"${binprefix}"/bin/
+ 		done < package/nosh-"$i".commands8
+ 	fi
+ 	if test -s package/nosh-"$i".aliases8
+ 	then
+ 		while read -r c a
+ 		do
+-			ln -f -s "$c" "${dest}"/nosh-"${i}"/"${binprefix}"/sbin/"$a" 
++			ln -f -s "$c" "${dest}"/nosh-"${i}"/"${binprefix}"/bin/"$a"
+ 		done < package/nosh-"$i".aliases8
+ 	fi
+ 
+@@ -165,13 +165,13 @@
+ if test -n "${dbusprefix}"
+ then
+ 	install -d -m 0755 -- "${dest}"/nosh-desktop-bus-shims/"${dbusprefix}"
+-	ln -f -s /usr/local/bin/dbus-daemon-launch-helper "${dest}"/nosh-desktop-bus-shims/"${dbusprefix}"/
++	ln -f -s /usr/libexec/dbus-daemon-launch-helper "${dest}"/nosh-desktop-bus-shims/"${dbusprefix}"/
+ fi
+ install -d -m 0755 -- "${dest}"/nosh-run-system-manager/
+ case "`uname`" in
+ Linux)	
+-	install -d -m 0755 -- "${dest}"/nosh-run-system-manager/sbin 
+-	ln -f -s system-manager "${dest}"/nosh-run-system-manager/sbin/init
++	install -d -m 0755 -- "${dest}"/nosh-run-system-manager/usr/bin
++	ln -f -s system-manager "${dest}"/nosh-run-system-manager/usr/bin/init-nosh
+ 	if test _"${binprefix}" != _"/usr"
+ 	then
+ 		install -d -m 0755 -- "${dest}"/nosh-bcron-as-cron-shims/usr/bin
