@@ -5,13 +5,14 @@ revision=1
 build_style=meson
 configure_args="-Dman=enabled -Dgstreamer=enabled -Ddocs=enabled -Dsystemd=disabled
  -Dbluez5=enabled -Dffmpeg=enabled -Dpipewire-alsa=enabled -Dpipewire-jack=enabled
- -Dvulkan=enabled -Dudevrulesdir=/usr/lib/udev/rules.d"
+ -Dvulkan=enabled -Dudevrulesdir=/usr/lib/udev/rules.d
+ -Dvolume=enabled"
 hostmakedepends="doxygen graphviz pkg-config xmltoman gettext"
 # LDAC support can be enabled when ldacbt is packaged
 makedepends="SDL2-devel ffmpeg-devel gst-plugins-base1-devel jack-devel
  sbc-devel v4l-utils-devel libva-devel libbluetooth-devel ncurses-devel
  libopenaptx-devel fdk-aac-devel"
-depends="libspa-alsa libspa-audioconvert libspa-audiomixer libspa-control"
+depends="rtkit"
 short_desc="Server and user space API to deal with multimedia pipelines"
 maintainer="Kridsada Thanabulpong <sirn@ogsite.net>"
 license="MIT"
@@ -29,8 +30,41 @@ if [ "$XBPS_TARGET_NO_ATOMIC8" ]; then
 fi
 
 post_install() {
+	# vinstall ${FILESDIR}/pipewire.desktop 644 etc/xdg/autostart
 	vlicense LICENSE
 	vdoc "${FILESDIR}/README.voidlinux"
+}
+
+libjack-pipewire_package() {
+	depends="libpipewire-${version}_${revision}"
+	short_desc+=" - JACK client library"
+	pkg_install() {
+		vmove usr/lib/pipewire-0.3/jack
+		vmove usr/bin/pw-jack
+		vmove usr/lib/spa-0.2/jack
+		vmove usr/share/man/man1/pw-jack.1
+	}
+}
+
+alsa-pipewire_package() {
+	depends="libpipewire-${version}_${revision}"
+	short_desc+=" - ALSA client library"
+	pkg_install() {
+		mkdir -p ${PKGDESTDIR}/etc/alsa/conf.d
+		vcopy "${DESTDIR}/usr/share/alsa/alsa.conf.d/*.conf" /etc/alsa/conf.d
+		vmove usr/lib/alsa-lib
+		vmove usr/share/alsa
+		vmove usr/lib/spa-0.2/alsa
+	}
+}
+
+pipewire-utils_package() {
+	short_desc+=" - pipewire utilities"
+	pkg_install() {
+		vmove "usr/bin/pw-*"
+		vmove "usr/bin/spa-*"
+		vmove "usr/share/man/man1/pw-*"
+	}
 }
 
 libpipewire_package() {
@@ -38,6 +72,9 @@ libpipewire_package() {
 	pkg_install() {
 		vmove "usr/lib/libpipewire-0.3.so.*"
 		vmove "usr/lib/pipewire-0.3/*.so"
+		vmove usr/lib/spa-0.2
+		vmove usr/lib/udev/rules.d
+		vmove usr/share/alsa-card-profile
 	}
 }
 
@@ -53,76 +90,6 @@ pipewire-devel_package() {
 	}
 }
 
-libspa-alsa_package() {
-	short_desc+=" - alsa plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/alsa
-	}
-}
-
-libspa-audioconvert_package() {
-	short_desc+=" - audioconvert plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/audioconvert
-	}
-}
-
-libspa-audiomixer_package() {
-	short_desc+=" - audiomixer plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/audiomixer
-	}
-}
-
-libspa-bluetooth_package() {
-	short_desc+=" - bluetooth plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/bluez5
-	}
-}
-
-libspa-control_package() {
-	short_desc+=" - control plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/control
-	}
-}
-
-libspa-ffmpeg_package() {
-	short_desc+=" - ffmpeg plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/ffmpeg
-	}
-}
-
-libspa-jack_package() {
-	short_desc+=" - jack plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/jack
-	}
-}
-
-libspa-v4l2_package() {
-	short_desc+=" - v4l2 plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/v4l2
-	}
-}
-
-libspa-videoconvert_package() {
-	short_desc+=" - videoconvert plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/videoconvert
-	}
-}
-
-libspa-vulkan_package() {
-	short_desc+=" - vulkan plugins"
-	pkg_install() {
-		vmove usr/lib/spa-0.2/vulkan
-	}
-}
-
 gstreamer1-pipewire_package() {
 	short_desc+=" - gstreamer plugin"
 	pkg_install() {
@@ -130,27 +97,18 @@ gstreamer1-pipewire_package() {
 	}
 }
 
-alsa-pipewire_package() {
-	depends="libpipewire-${version}_${revision}"
-	short_desc+=" - ALSA client library"
-	pkg_install() {
-		vmove usr/lib/alsa-lib
-		vmove usr/share/alsa/alsa.conf.d
-	}
-}
-
-libjack-pipewire_package() {
-	depends="libpipewire-${version}_${revision}"
-	short_desc+=" - JACK client library"
-	pkg_install() {
-		vmove usr/lib/pipewire-0.3/jack
-		vmove usr/bin/pw-jack
-	}
-}
-
 pipewire-doc_package() {
 	short_desc+=" - documentation"
 	pkg_install() {
 		vmove usr/share/doc
+	}
+}
+
+pipewire-jack-dropin_package() {
+	depends="libjack-pipewire-${version}_${revision}"
+	conflicts="jack"
+	short_desc+=" - Use pipewire as drop-in replacement for JACK"
+	pkg_install() {
+		vinstall ${FILESDIR}/pipewire-jack.conf 644 etc/ld.so.conf.d
 	}
 }
