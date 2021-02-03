@@ -1,0 +1,49 @@
+# Template file for 'river'
+pkgname=river
+version=0.0.1
+_river_commit=master
+revision=1
+#archs="i686 x86_64"
+wrksrc="river-${_river_commit}"
+hostmakedepends="git pkg-config scdoc zig"
+makedepends="libevdev-devel libxkbcommon-devel pixman-devel wayland-devel wayland-protocols wlroots-devel"
+conf_files="/etc/river/init"
+short_desc="Dynamic tiling wayland compositor"
+maintainer="Giuseppe Fierro <gspe+void@offlink.xyz>"
+license="GPL-3.0-or-later"
+homepage="https://github.com/ifreund/river"
+_zigwayland_commit=master
+_zigpixman_commit=master
+_zigxkbcommon_commit=master
+_zigwlroots_commit=master
+distfiles="https://github.com/ifreund/river/archive/${_river_commit}.zip>river.zip
+ https://github.com/ifreund/zig-wayland/archive/${_zigwayland_commit}.zip>zig-wayland.zip
+ https://github.com/ifreund/zig-pixman/archive/${_zigpixman_commit}.zip>zig-pixman.zip
+ https://github.com/ifreund/zig-xkbcommon/archive/${_zigxkbcommon_commit}.zip>zig-xkbcommon.zip
+ https://github.com/swaywm/zig-wlroots/archive/${_zigwlroots_commit}.zip>zig-wlroots.zip"
+checksum="4b42361bbe7cc73962b544b98e79b19cfe09b5b3c9dacc70923892a7ab1475aa
+ 3e746194a2dcd92d55dfae205d3b66f7be0b2e6ef10c2004a648d302badae0b1
+ 576c516d09779a1ccc180dd33d957429f97ebd1a03eba39be9d5dde05964d37c
+ 8c3114fba6d3d7780ddb8f88d644ae8f768cf3a43b263c2819bf2f22a06f0866
+ ddfced9f1fc55c4ced1e7a7670492e6bdcc91c68722ed22add7feb78506021b2"
+nopie=yes
+
+pre_configure() {
+	# move submodule to proper location
+	rmdir deps/zig-wayland
+	rmdir deps/zig-pixman
+	rmdir deps/zig-xkbcommon
+	rmdir deps/zig-wlroots
+
+	mv -v ../zig-wayland-master deps/zig-wayland
+	mv -v ../zig-pixman-master deps/zig-pixman
+	mv -v ../zig-xkbcommon-master deps/zig-xkbcommon
+	mv -v ../zig-wlroots-master deps/zig-wlroots
+	}
+
+do_install() {
+	DESTDIR="${DESTDIR}" zig build --prefix /usr \
+	-Drelease-safe \
+	-Dman-pages \
+	install
+}
