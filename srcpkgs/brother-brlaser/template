@@ -1,8 +1,9 @@
 # Template file for 'brother-brlaser'
 pkgname=brother-brlaser
-version=6
+version=6.git
 revision=1
-wrksrc="brlaser-${version}"
+_commit="9d7ddda8383bfc4d205b5e1b49de2b8bcd9137f1"
+wrksrc="brlaser-${_commit}"
 build_style=cmake
 makedepends="cups-devel"
 depends="cups ghostscript"
@@ -10,5 +11,5 @@ short_desc="Brother laser printer driver"
 maintainer="Jaredy <jaredycalves@gmail.com>"
 license="GPL-2.0-or-later"
 homepage="https://github.com/pdewacht/brlaser"
-distfiles="https://github.com/pdewacht/brlaser/archive/v${version}.tar.gz"
-checksum=fe7c117eb7e837b6a1751f61a813c218f68a5d8fc40f3403f6a4b1cf5a4758dd
+distfiles="https://github.com/pdewacht/brlaser/archive/${_commit}.tar.gz"
+checksum=f4769a3ff702fd3bc047192e79fa07a2778cf8baa56d802c0af91cc43dd0a7af
