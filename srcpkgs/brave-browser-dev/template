@@ -1,0 +1,33 @@
+# Template file for 'brave-browser-dev'
+pkgname=brave-browser-dev
+version=1.22.56
+revision=1
+archs="x86_64"
+build_style=fetch
+hostmakedepends=""
+makedepends=""
+depends="desktop-file-utils hicolor-icon-theme"
+short_desc="Next generation Brave browser"
+maintainer="Giuseppe Fierro <gspe@ae-design.ws>"
+license="MPL-2.0"
+homepage="https://brave.com"
+distfiles="https://github.com/brave/brave-browser/releases/download/v${version}/${pkgname}_${version}_amd64.deb"
+checksum=beb133cd27bab3a5efc22cf85d57d5cf190ca356b0ae2b349fad591ad749d7b2
+nostrip=yes
+
+do_extract() {
+	ar x ${XBPS_SRCDISTDIR}/${pkgname}-${version}/brave-browser-dev_${version}_amd64.deb
+	bsdtar xf data.tar.xz --exclude={./etc,./opt/brave.com/brave-dev/cron}
+}
+do_install() {
+	vcopy opt opt
+	vmkdir usr/bin
+	ln -s /opt/brave.com/brave-dev/brave-browser-dev ${DESTDIR}/usr/bin/brave-browser-dev
+	vinstall usr/share/applications/brave-browser-dev.desktop 0644 \
+		usr/share/applications
+	vinstall opt/brave.com/brave-dev/product_logo_128_dev.png 0644 \
+		usr/share/icons/hicolor/128x128/apps brave-browser-dev.png
+	vman usr/share/man/man1/brave-browser-dev.1.gz
+	# suid sandbox
+	chmod 4755 ${DESTDIR}/opt/brave.com/brave-dev/chrome-sandbox
+}

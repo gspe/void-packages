@@ -1,0 +1,33 @@
+# Template file for 'brave-browser-nightly'
+pkgname=brave-browser-nightly
+version=1.24.37
+revision=1
+archs="x86_64"
+build_style=fetch
+hostmakedepends=""
+makedepends=""
+depends="desktop-file-utils hicolor-icon-theme"
+short_desc="Next generation Brave browser"
+maintainer="Giuseppe Fierro <gspe@offlink.xyz>"
+license="MPL-2.0"
+homepage="https://brave.com"
+distfiles="https://github.com/brave/brave-browser/releases/download/v${version}/${pkgname}_${version}_amd64.deb"
+checksum=51c6688da49daa790622a83d2ad955018c3134a2c1ef56f97ccf9ab53895e1b3
+nostrip=yes
+
+do_extract() {
+	ar x ${XBPS_SRCDISTDIR}/${pkgname}-${version}/brave-browser-nightly_${version}_amd64.deb
+	bsdtar xf data.tar.xz --exclude={./etc,./opt/brave.com/brave-nightly/cron}
+}
+do_install() {
+	vcopy opt opt
+	vmkdir usr/bin
+	ln -s /opt/brave.com/brave-nightly/brave-browser-nightly ${DESTDIR}/usr/bin/brave-browser-nightly
+	vinstall usr/share/applications/brave-browser-nightly.desktop 0644 \
+		usr/share/applications
+	vinstall opt/brave.com/brave-nightly/product_logo_128_nightly.png 0644 \
+		usr/share/icons/hicolor/128x128/apps brave-browser-nightly.png
+	vman usr/share/man/man1/brave-browser-nightly.1.gz
+	# suid sandbox
+	chmod 4755 ${DESTDIR}/opt/brave.com/brave-nightly/chrome-sandbox
+}
